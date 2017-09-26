@@ -45,16 +45,16 @@ namespace Senparc.Weixin.Helpers
         public static DateTime BaseTime = new DateTime(1970, 1, 1);//Unix起始时间
 
         /// <summary>
-        /// 转换微信DateTime时间到C#时间
+        /// 转换微信DateTime时间到C#时间    
         /// </summary>
         /// <param name="dateTimeFromXml">微信DateTime</param>
         /// <returns></returns>
         public static DateTime GetDateTimeFromXml(long dateTimeFromXml)
-        {
+        {//中国在东8区，所以需要加上8个小时
             return BaseTime.AddTicks((dateTimeFromXml + 8 * 60 * 60) * 10000000);
         }
         /// <summary>
-        /// 转换微信DateTime时间到C#时间
+        /// 转换微信DateTime时间到C#时间  本函数实现XML中的字符串转换为long类型
         /// </summary>
         /// <param name="dateTimeFromXml">微信DateTime</param>
         /// <returns></returns>

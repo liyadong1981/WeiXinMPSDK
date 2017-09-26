@@ -47,7 +47,7 @@ namespace Senparc.Weixin.MP.Sample.Controllers
             try
             {
                 requestDoc = XDocument.Load(Request.InputStream);
-
+                //将获取的HTTP请求信息转换为请求实体对象
                 var requestMessage = RequestMessageFactory.GetRequestEntity(requestDoc);
                 //如果不需要记录requestDoc，只需要：
                 //var requestMessage = RequestMessageFactory.GetRequestEntity(Request.InputStream);

@@ -58,21 +58,27 @@ namespace Senparc.Weixin.MP.Helpers
         /// <param name="doc">XML</param>
         public static void FillEntityWithXml<T>(this T entity, XDocument doc) where T : /*MessageBase*/ class, new()
         {
+            //如果实体为空，生成一个新的对象
             entity = entity ?? new T();
             var root = doc.Root;
             if (root == null)
             {
                 return;//无法处理
             }
-
+            
+            //取得实体对象的所有属性
             var props = entity.GetType().GetProperties();
+         
+         
             foreach (var prop in props)
             {
-                var propName = prop.Name;
+                var propName = prop.Name;                //取得属性的名称  类似 MsgType、MsgId、ToUserName、FromUserName等
+
                 if (root.Element(propName) != null)
-                {
+                {//在XML文件中存在该节点
+                    Senparc.Weixin.WeixinTrace.SendCustomLog("程序调试", "XML中存在该节点"+ propName+"节点类型为："+ prop.PropertyType.Name);
                     switch (prop.PropertyType.Name)
-                    {
+                    {//分析该属性的数据类型   并对该属性进行填充  （XML内容全部为字符形式的，需要转换到不同的数据类型）
                         //case "String":
                         //    goto default;
                         case "DateTime":
@@ -80,11 +86,12 @@ namespace Senparc.Weixin.MP.Helpers
                         case "Int64":
                         case "Double":
                         case "Nullable`1": //可为空对象
-                            EntityUtility.EntityUtility.FillSystemType(entity, prop, root.Element(propName).Value);
+                          
+                            EntityUtility.EntityUtility.FillSystemType(entity, prop, root.Element(propName).Value);    //向实体对象的属性填充值
                             break;
                         case "Boolean":
                             if (propName == "FuncFlag")
-                            {
+                            {//该属性在C#中为Boolean类型，在XML中表现为整形，需要在此处预处理为Boolean类型再进行填充
                                 EntityUtility.EntityUtility.FillSystemType(entity, prop, root.Element(propName).Value == "1");
                             }
                             else
@@ -213,6 +220,7 @@ namespace Senparc.Weixin.MP.Helpers
                             break;
                     }
                 }
+               
             }
         }
 

@@ -73,7 +73,9 @@ namespace Senparc.Weixin.MP
 
             try
             {
+                //取得当前请求实体的类型
                 msgType = MsgTypeHelper.GetRequestMsgType(doc);
+                //根据得到的实体类型，产生请求对象
                 switch (msgType)
                 {
                     case RequestMsgType.Text:
@@ -245,8 +247,11 @@ namespace Senparc.Weixin.MP
                         }
                         break;
                     default:
+                        //程序中没有对应的实体类型
                         throw new UnknownRequestMsgTypeException(string.Format("MsgType：{0} 在RequestMessageFactory中没有对应的处理程序！", msgType), new ArgumentOutOfRangeException());//为了能够对类型变动最大程度容错（如微信目前还可以对公众账号suscribe等未知类型，但API没有开放），建议在使用的时候catch这个异常
                 }
+                //使用XML文档填充请求对象的信息（该XML文档是由HTTP请求信息得到）-★此函数为扩展函数
+             
                 EntityHelper.FillEntityWithXml(requestMessage, doc);
             }
             catch (ArgumentException ex)
