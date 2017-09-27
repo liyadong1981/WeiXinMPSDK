@@ -97,6 +97,7 @@ namespace Senparc.Weixin.MP
                     default:
                         throw new UnknownRequestMsgTypeException(string.Format("MsgType：{0} 在ResponseMessageFactory中没有对应的处理程序！", msgType), new ArgumentOutOfRangeException());
                 }
+               
                 EntityHelper.FillEntityWithXml(responseMessage, doc);
             }
             catch (ArgumentException ex)

@@ -42,6 +42,7 @@ using System.Xml.Linq;
 using Senparc.Weixin.Helpers;
 using Senparc.Weixin.MP.Entities;
 using Senparc.Weixin.Utilities;
+using System.Web;
 
 namespace Senparc.Weixin.MP.Helpers
 {
@@ -65,18 +66,19 @@ namespace Senparc.Weixin.MP.Helpers
             {
                 return;//无法处理
             }
-            
+            //{2017-9-27测试时使用，将接收到的XML文件保存
+            string Path = System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+            Senparc.Weixin.WeixinTrace.SendCustomLog("调试程序", Path);
+            doc.Save(Path + "App_Data/XML/" + DateTime.Now.ToString("d_MMM_yyyy_HH_mm_ss") + "_Request_" + root.Element("FromUserName").Value + ".txt");//测试时可开启，帮助跟踪数据
+           //}
             //取得实体对象的所有属性
             var props = entity.GetType().GetProperties();
-         
-         
             foreach (var prop in props)
             {
                 var propName = prop.Name;                //取得属性的名称  类似 MsgType、MsgId、ToUserName、FromUserName等
 
                 if (root.Element(propName) != null)
                 {//在XML文件中存在该节点
-                    Senparc.Weixin.WeixinTrace.SendCustomLog("程序调试", "XML中存在该节点"+ propName+"节点类型为："+ prop.PropertyType.Name);
                     switch (prop.PropertyType.Name)
                     {//分析该属性的数据类型   并对该属性进行填充  （XML内容全部为字符形式的，需要转换到不同的数据类型）
                         //case "String":
@@ -86,7 +88,6 @@ namespace Senparc.Weixin.MP.Helpers
                         case "Int64":
                         case "Double":
                         case "Nullable`1": //可为空对象
-                          
                             EntityUtility.EntityUtility.FillSystemType(entity, prop, root.Element(propName).Value);    //向实体对象的属性填充值
                             break;
                         case "Boolean":
@@ -116,6 +117,7 @@ namespace Senparc.Weixin.MP.Helpers
                         //以下为实体类型
                         case "List`1": //List<T>类型，ResponseMessageNews适用
                             {
+                                Senparc.Weixin.WeixinTrace.LYD_Debug(@"case  List1");
                                 var genericArguments = prop.PropertyType.GetGenericArguments();
                                 var genericArgumentTypeName = genericArguments[0].Name;
                                 if (genericArgumentTypeName == "Article")

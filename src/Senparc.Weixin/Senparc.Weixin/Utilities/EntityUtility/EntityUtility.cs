@@ -47,7 +47,7 @@ namespace Senparc.Weixin.EntityUtility
     public static class EntityUtility
     {
         /// <summary>
-        /// 将对象转换到指定类型
+        /// 将对象转换到指定类型   2017-9-27日以服务号的方式进行测试，不存在空值情况，也不存在泛型的情况
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="convertibleValue"></param>
@@ -55,20 +55,19 @@ namespace Senparc.Weixin.EntityUtility
         public static T ConvertTo<T>(this IConvertible convertibleValue)
         {
             if (null == convertibleValue)
-            {
+            {//如果需要转换的变量为空，生成指定类型的默认值
                 return default(T);
             }
-
             if (!typeof(T).IsGenericType)
-            {
-                return (T)Convert.ChangeType(convertibleValue, typeof(T));
+            {//查看当前需要转换的类型是否为泛型类型
+                return (T)Convert.ChangeType(convertibleValue, typeof(T));    //非泛型类型,将变量转换为指定类型
             }
             else
-            {
-                Type genericTypeDefinition = typeof(T).GetGenericTypeDefinition();
+            {//泛型类型
+                Type genericTypeDefinition = typeof(T).GetGenericTypeDefinition();     //得到可用于构造当前泛型类型的泛型类型定义的 Type 对象
                 if (genericTypeDefinition == typeof(Nullable<>))
-                {
-                    return (T)Convert.ChangeType(convertibleValue, Nullable.GetUnderlyingType(typeof(T)));
+                {//泛型类型为可空类型         开放类型是typeof(System.Nullable<>)
+                    return (T)Convert.ChangeType(convertibleValue, Nullable.GetUnderlyingType(typeof(T))); //将变量转换为指定类型,该类型为可空类型的基础类型  如int？的基础类型为int
                 }
             }
             throw new InvalidCastException(string.Format("Invalid cast from type \"{0}\" to type \"{1}\".", convertibleValue.GetType().FullName, typeof(T).FullName));
@@ -81,10 +80,10 @@ namespace Senparc.Weixin.EntityUtility
         /// <typeparam name="T"></typeparam>
         /// <param name="entity">实体对象</param>
         /// <param name="prop">将填充的属性</param>
-        /// <param name="value">属性值</param>
+        /// <param name="value">属性值--由调用函数传递过来的是由XML文件读取的字符串类型值</param>
         public static void FillSystemType<T>(T entity, PropertyInfo prop, IConvertible value)
         {
-          
+           
             FillSystemType(entity, prop, value, prop.PropertyType);
         }
 
@@ -94,18 +93,15 @@ namespace Senparc.Weixin.EntityUtility
         /// <typeparam name="T"></typeparam>
         /// <param name="entity">实体对象</param>
         /// <param name="prop">将填充的属性</param>
-        /// <param name="value">属性值</param>
+        /// <param name="value">属性值--由调用函数传递过来的是由XML文件读取的字符串类型值</param>
         /// <param name="specialType">属性类型</param>
         public static void FillSystemType<T>(T entity, PropertyInfo prop, IConvertible value, Type specialType)
         {
            
             object setValue = null;
 
-             Senparc.Weixin.WeixinTrace.SendCustomLog("程序调试", "属性名称:" + prop.Name + "    将要转换的类型:" + specialType.Name + "     value类型:" + value.GetType().Name);
-           
             if (value.GetType() != specialType)
-            {//数据类型不相同
-                
+            {//数据类型不相同 
                 switch (specialType.Name)
                 {//根据不同的数据类型，将value（XML文件中的字符串）转换为不同的数据
                     case "Boolean":
@@ -129,7 +125,6 @@ namespace Senparc.Weixin.EntityUtility
                         //CultureInfo 类保存区域性特定的信息,如关联的语言、子语言、国家/地区、日历和区域性约定
                         //CultureInfo.InvariantCulture 属性既不是非特定区域性，也不是特定区域性。它是第三种类型的区域性，该区域性是不区分区域性的。它与英语语言关联，但不与任何国家 / 地区关联
                         //如果要执行不受 CultureInfo.CurrentCulture 的值影响的区分区域性的字符串操作，则使用接受 CultureInfo 参数的方法，为该 CultureInfo 参数指定 CultureInfo.InvariantCulture 属性的值
-                       
                         setValue = value.ToString(CultureInfo.InvariantCulture);
                         break;
                     default:
@@ -137,18 +132,19 @@ namespace Senparc.Weixin.EntityUtility
                         break;
                 }
             }
-
+           
             switch (specialType.Name)
             {
                 case "Nullable`1": //可为空对象
                     {
+                       
                         if (!string.IsNullOrEmpty(value as string))
                         {//判断字符串是空引用，或值为空  即 如果存在属性值
-                            var genericArguments = prop.PropertyType.GetGenericArguments();
-                            FillSystemType(entity, prop, value, genericArguments[0]);
+                            var genericArguments = prop.PropertyType.GetGenericArguments();   //取得 泛型类型的类型参数或泛型类型定义的类型参数的 Type 对象的数组
+                            FillSystemType(entity, prop, value, genericArguments[0]);                     //递归设置属性值，取得第一个泛型参数类型作为将要设置的数据类型
                         }
                         else
-                        {
+                        {//文化素质相应属性值，属性值为空
                             prop.SetValue(entity, null, null);//默认通常为null
                         }
                         break;
@@ -161,7 +157,7 @@ namespace Senparc.Weixin.EntityUtility
                 //case "Int64":
                 //case "Double":
                 default:
-                    //设置实体的相应属性值
+                    //设置实体的相应属性值  -- 如果没有进行类型转换，直接使用原始值
                     prop.SetValue(entity, setValue ?? value, null);
                     break;
             }

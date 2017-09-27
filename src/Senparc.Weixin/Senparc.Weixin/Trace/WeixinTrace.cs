@@ -91,6 +91,15 @@ namespace Senparc.Weixin
         /// </summary>
         public static Action OnLogFunc;
 
+
+        public static void LYD_Debug(string FileName)
+        {
+            string Path = System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+            Path = Path + "App_Data/DebugInfo/" + FileName + DateTime.Now.Ticks+ ".txt";
+            File.Create(Path).Close();
+            
+        }
+
         /// <summary>
         /// 打开日志开始记录
         /// </summary>
