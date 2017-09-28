@@ -43,7 +43,7 @@ using Senparc.Weixin.MP.Helpers;
 namespace Senparc.Weixin.MP
 {
     /// <summary>
-    /// ResponseMessage 消息处理方法工厂类
+    /// ResponseMessage 消息处理方法工厂类   2017-9-28该工厂类基本上在实际过程中基本未使用，主要是用的是ResponseMessageBase类中的函数生成对象
     /// </summary>
     public static class ResponseMessageFactory
     {

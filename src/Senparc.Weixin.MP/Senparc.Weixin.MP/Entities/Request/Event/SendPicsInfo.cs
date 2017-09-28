@@ -20,6 +20,10 @@ namespace Senparc.Weixin.MP.Entities
     /// </summary>
     public class SendPicsInfo
     {
+        public SendPicsInfo()
+        {
+            Senparc.Weixin.WeixinTrace.LYD_Debug("SendPicsInfo");
+        }
         /// <summary>
         /// 发送的图片数量
         /// </summary>

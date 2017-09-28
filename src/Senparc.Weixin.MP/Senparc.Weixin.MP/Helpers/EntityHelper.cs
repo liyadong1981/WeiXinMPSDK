@@ -69,7 +69,7 @@ namespace Senparc.Weixin.MP.Helpers
             //{2017-9-27测试时使用，将接收到的XML文件保存
             string Path = System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
             Senparc.Weixin.WeixinTrace.SendCustomLog("调试程序", Path);
-            doc.Save(Path + "App_Data/XML/" + DateTime.Now.ToString("d_MMM_yyyy_HH_mm_ss") + "_Request_" + root.Element("FromUserName").Value + ".txt");//测试时可开启，帮助跟踪数据
+            doc.Save(Path + "App_Data/XML/" + DateTime.Now.ToString("d_MMM_yyyy_HH_mm_ss") + "_Request_" + root.Element("FromUserName").Value + DateTime.Now.Ticks+".txt");//测试时可开启，帮助跟踪数据
            //}
             //取得实体对象的所有属性
             var props = entity.GetType().GetProperties();
@@ -117,24 +117,24 @@ namespace Senparc.Weixin.MP.Helpers
                         //以下为实体类型
                         case "List`1": //List<T>类型，ResponseMessageNews适用
                             {
-                                Senparc.Weixin.WeixinTrace.LYD_Debug(@"case  List1");
-                                var genericArguments = prop.PropertyType.GetGenericArguments();
-                                var genericArgumentTypeName = genericArguments[0].Name;
-                                if (genericArgumentTypeName == "Article")
+                                var genericArguments = prop.PropertyType.GetGenericArguments();     //取得泛型参数列表
+                                var genericArgumentTypeName = genericArguments[0].Name;              //取得第一个参数的类型
+                          
+                                if (genericArgumentTypeName == "Article")                                            //参数类型为Article类型（图文）
                                 {
                                     //文章下属节点item
-                                    List<Article> articles = new List<Article>();
-                                    foreach (var item in root.Element(propName).Elements("item"))
+                                    List<Article> articles = new List<Article>();                                         //生成图文列表对象
+                                    foreach (var item in root.Element(propName).Elements("item"))        //取得XML文件中“Articles”节点下的所有item
                                     {
-                                        var article = new Article();
-                                        FillEntityWithXml(article, new XDocument(item));
-                                        articles.Add(article);
+                                        var article = new Article();                                                                //生成单个图文对象
+                                        FillEntityWithXml(article, new XDocument(item));                          //使用取得XML内容填充该图文对象
+                                        articles.Add(article);                                                                         //该图文对象加入到图文列表对象中
                                     }
-                                    prop.SetValue(entity, articles, null);
+                                    prop.SetValue(entity, articles, null);                                                     //设置实体的该属性---  Articles属性 
                                 }
-                                else if (genericArgumentTypeName == "Account")
-                                {
-                                    List<CustomerServiceAccount> accounts = new List<CustomerServiceAccount>();
+                                else if (genericArgumentTypeName == "Account")                              // Account类型与响应回复多客服消息  ResponseMessageTransfer_Customer_Service中定义的数据类型不一致
+                                {                                                                                                              //有可能永远不会执行
+                                    List<CustomerServiceAccount> accounts = new List<CustomerServiceAccount>();   
                                     foreach (var item in root.Elements(propName))
                                     {
                                         var account = new CustomerServiceAccount();
@@ -143,20 +143,20 @@ namespace Senparc.Weixin.MP.Helpers
                                     }
                                     prop.SetValue(entity, accounts, null);
                                 }
-                                else if (genericArgumentTypeName == "PicItem")
+                                else if (genericArgumentTypeName == "PicItem")                                //参数类型为图片---此处程序段由填充  SendPicsInfo属性时调用
                                 {
                                     List<PicItem> picItems = new List<PicItem>();
-                                    foreach (var item in root.Elements(propName).Elements("item"))
+                                    foreach (var item in root.Elements(propName).Elements("item"))    
                                     {
-                                        var picItem = new PicItem();
-                                        var picMd5Sum = item.Element("PicMd5Sum").Value;
-                                        Md5Sum md5Sum = new Md5Sum() { PicMd5Sum = picMd5Sum };
+                                        var picItem = new PicItem();                                                           //生成图片对象
+                                        var picMd5Sum = item.Element("PicMd5Sum").Value;                  //取出XML此节点下的PicMd5Sum数据
+                                        Md5Sum md5Sum = new Md5Sum() { PicMd5Sum = picMd5Sum };  //生成Md5Sum（图片的MD5值）对象
                                         picItem.item = md5Sum;
                                         picItems.Add(picItem);
                                     }
                                     prop.SetValue(entity, picItems, null);
                                 }
-                                else if (genericArgumentTypeName == "AroundBeacon")
+                                else if (genericArgumentTypeName == "AroundBeacon")                    //参数类型为AroundBeacon类型（事件之摇一摇事件通知）            
                                 {
                                     List<AroundBeacon> aroundBeacons = new List<AroundBeacon>();
                                     foreach (var item in root.Elements(propName).Elements("AroundBeacon"))
@@ -167,13 +167,13 @@ namespace Senparc.Weixin.MP.Helpers
                                     }
                                     prop.SetValue(entity, aroundBeacons, null);
                                 }
-                                else if (genericArgumentTypeName == "CopyrightCheckResult_ResultList")//RequestMessageEvent_MassSendJobFinish
-                                {
+                                else if (genericArgumentTypeName == "CopyrightCheckResult_ResultList")//参数类型为Article类型（事件之推送群发结果）  RequestMessageEvent_MassSendJobFinish
+                                {                                                                                                                        //---此处程序段由填充  CopyrightCheckResult属性时调用
                                     List<CopyrightCheckResult_ResultList> resultList = new List<CopyrightCheckResult_ResultList>();
-                                    foreach (var item in root.Elements("ResultList").Elements("item"))
+                                    foreach (var item in root.Elements("ResultList").Elements("item"))            //比较特殊,又嵌套了一个ResultList
                                     {
                                         CopyrightCheckResult_ResultList resultItem = new CopyrightCheckResult_ResultList();
-                                        FillEntityWithXml(resultItem.item, new XDocument(item));
+                                        FillEntityWithXml(resultItem.item, new XDocument(item));                   //此处嵌套调用,填充  CopyrightCheckResult_ResultList_Item类型数据
                                         resultList.Add(resultItem);
                                     }
                                     prop.SetValue(entity, resultList, null);

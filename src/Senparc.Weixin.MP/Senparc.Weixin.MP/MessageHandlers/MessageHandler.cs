@@ -379,6 +379,13 @@ namespace Senparc.Weixin.MP.MessageHandlers
                         throw new UnknownRequestMsgTypeException("未知的MsgType请求类型", null);
                 }
 
+                //{2017-9-28测试使用，将发送的XML文件保存供调试使用
+                string Path = System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+                Path = Path + "App_Data/SendXML/" + DateTime.Now.ToString("d_MMM_yyyy_HH_mm_ss") + "_Request_" + ResponseMessage.FromUserName + +DateTime.Now.Ticks + ".txt";
+                FinalResponseDocument.Save(Path);
+                //}
+
+
                 //记录上下文
                 //此处修改
                 if (WeixinContextGlobal.UseWeixinContext && ResponseMessage != null && !string.IsNullOrEmpty(ResponseMessage.FromUserName))
