@@ -250,10 +250,11 @@ namespace Senparc.Weixin.MP.Helpers
         /// <returns></returns>
         public static XDocument ConvertEntityToXml<T>(this T entity) where T : class, new()
         {
+            //如果实体为空，生成一个新的对象
             entity = entity ?? new T();
-            var doc = new XDocument();
-            doc.Add(new XElement("xml"));
-            var root = doc.Root;
+            var doc = new XDocument();                                //生成一个新的XML文档对象
+            doc.Add(new XElement("xml"));                           //增加根节点
+            var root = doc.Root;                                            //得到根节点
 
             /* 注意！
              * 经过测试，微信对字段排序有严格要求，这里对排序进行强制约束

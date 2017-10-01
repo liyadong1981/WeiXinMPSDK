@@ -106,10 +106,6 @@ namespace Senparc.Weixin.MP.Entities
                 responseMessage.ToUserName = requestMessage.FromUserName;
                 responseMessage.FromUserName = requestMessage.ToUserName;
                 responseMessage.CreateTime = DateTime.Now; //使用当前最新时间
-
-
-
-               
             }
             catch (Exception ex)
             {

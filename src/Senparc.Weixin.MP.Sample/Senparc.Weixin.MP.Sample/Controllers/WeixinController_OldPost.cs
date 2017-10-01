@@ -115,7 +115,7 @@ namespace Senparc.Weixin.MP.Sample.Controllers
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                var responseDoc = MP.Helpers.EntityHelper.ConvertEntityToXml(responseMessage);
+                var responseDoc = MP.Helpers.EntityHelper.ConvertEntityToXml(responseMessage);       // 将实体对象转换为XML
                 responseDoc.Save(Server.MapPath("~/App_Data/" + DateTime.Now.Ticks + "_Response_" + responseMessage.ToUserName + ".txt"));//测试时可开启，帮助跟踪数据
 
                 return Content(responseDoc.ToString());
