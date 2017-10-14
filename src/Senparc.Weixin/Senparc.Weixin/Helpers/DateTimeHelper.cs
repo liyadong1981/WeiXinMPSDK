@@ -69,7 +69,7 @@ namespace Senparc.Weixin.Helpers
         /// <param name="dateTime">时间</param>
         /// <returns></returns>
         public static long GetWeixinDateTime(DateTime dateTime)
-        {
+        {//中国在东8区，所以需要减去8个小时
             return (dateTime.Ticks - BaseTime.Ticks) / 10000000 - 8 * 60 * 60;
         }
     }

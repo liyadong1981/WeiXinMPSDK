@@ -291,23 +291,23 @@ namespace Senparc.Weixin.MP.Helpers
                 propNameOrder.AddRange(new[] { "Content", "FuncFlag" });
             }
 
-            Func<string, int> orderByPropName = propNameOrder.IndexOf;
+            Func<string, int> orderByPropName = propNameOrder.IndexOf;                                                         //排序方法
 
-            var props = entity.GetType().GetProperties().OrderBy(p => orderByPropName(p.Name)).ToList();
+            var props = entity.GetType().GetProperties().OrderBy(p => orderByPropName(p.Name)).ToList();       //按照propNameOrder的顺序对实体的属性进行排序
             foreach (var prop in props)
-            {
+            {//迭代实体所有属性
                 var propName = prop.Name;
                 if (propName == "Articles")
                 {
                     //文章列表
-                    var atriclesElement = new XElement("Articles");
-                    var articales = prop.GetValue(entity, null) as List<Article>;
+                    var atriclesElement = new XElement("Articles");                                                                             //生成临时XML元素对象
+                    var articales = prop.GetValue(entity, null) as List<Article>;                                                           //取得实体的该属性值并转换类型  
                     foreach (var articale in articales)
                     {
-                        var subNodes = ConvertEntityToXml(articale).Root.Elements();
-                        atriclesElement.Add(new XElement("item", subNodes));
+                        var subNodes = ConvertEntityToXml(articale).Root.Elements();                                                //将泛型队列类型中的每一个元素转换为XML格式
+                        atriclesElement.Add(new XElement("item", subNodes));                                                           //增加到临时XML元素对象
                     }
-                    root.Add(atriclesElement);
+                    root.Add(atriclesElement);                                                                                                              //增加到XML文件中去
                 }
                 else if (propName == "TransInfo")
                 {
@@ -325,8 +325,8 @@ namespace Senparc.Weixin.MP.Helpers
                 {
                     //音乐、图片、视频、语音格式
                     var musicElement = new XElement(propName);
-                    var media = prop.GetValue(entity, null);// as Music;
-                    var subNodes = ConvertEntityToXml(media).Root.Elements();
+                    var media = prop.GetValue(entity, null);// as Music;                                                                         //取得该属性值
+                    var subNodes = ConvertEntityToXml(media).Root.Elements();                                                         //递归调用填充该复杂类下边的属性
                     musicElement.Add(subNodes);
                     root.Add(musicElement);
                 }
@@ -353,44 +353,43 @@ namespace Senparc.Weixin.MP.Helpers
                     {
                         case "String":
                             root.Add(new XElement(propName,
-                                             new XCData(prop.GetValue(entity, null) as string ?? "")));
+                                             new XCData(prop.GetValue(entity, null) as string ?? "")));                                   //如果该属性类型为字符串类型，在XML文件中增加该节点
                             break;
                         case "DateTime":
-                            root.Add(new XElement(propName,
+                            root.Add(new XElement(propName,                                                                                    //该属性为日期时间类型，取得属性之后转换为微信时间类型后再XML文件中增加该节点
                                                   DateTimeHelper.GetWeixinDateTime(
                                                       (DateTime)prop.GetValue(entity, null))));
                             break;
                         case "Boolean":
                             if (propName == "FuncFlag")
                             {
-                                root.Add(new XElement(propName, (bool)prop.GetValue(entity, null) ? "1" : "0"));
+                                root.Add(new XElement(propName, (bool)prop.GetValue(entity, null) ? "1" : "0"));      //对该类型下的“FuncFlag”属性转换为数字格式并增加到XML节点中
                             }
                             else
-                            {
+                            {                                                                                                                                           //其他“Boolean”类型的属性
                                 goto default;
                             }
                             break;
                         case "ResponseMsgType":
-                            root.Add(new XElement(propName, new XCData(prop.GetValue(entity, null).ToString().ToLower())));
+                            root.Add(new XElement(propName, new XCData(prop.GetValue(entity, null).ToString().ToLower())));   //写入返回类型  将枚举变量转换为小写字符串加入XML中
                             break;
-                        case "Article":
+                        case "Article":                                                                                                                                                 //按当前代码可能不会执行到
                             root.Add(new XElement(propName, prop.GetValue(entity, null).ToString().ToLower()));
                             break;
                         case "TransInfo":
-                            root.Add(new XElement(propName, prop.GetValue(entity, null).ToString().ToLower()));
+                            root.Add(new XElement(propName, prop.GetValue(entity, null).ToString().ToLower()));                        //按当前代码可能不会执行到
                             break;
                         default:
                             if (prop.PropertyType.IsClass && prop.PropertyType.IsPublic)
-                            {
+                            {//如果该属性为类或者委托类型并且该类型为公开类型
                                 //自动处理其他实体属性
-                                var subEntity = prop.GetValue(entity, null);
-                                var subNodes = ConvertEntityToXml(subEntity).Root.Elements();
-                                root.Add(new XElement(propName, subNodes));
+                                var subEntity = prop.GetValue(entity, null);                                                                 //生成一个临时实体对象
+                                var subNodes = ConvertEntityToXml(subEntity).Root.Elements();                              //递归调用转换函数
+                                root.Add(new XElement(propName, subNodes));                                                         
                             }
                             else
                             {
-                                root.Add(new XElement(propName, prop.GetValue(entity, null)));
-
+                                root.Add(new XElement(propName, prop.GetValue(entity, null)));                             //增加该属性到XML文件中
                             }
                             break;
                     }

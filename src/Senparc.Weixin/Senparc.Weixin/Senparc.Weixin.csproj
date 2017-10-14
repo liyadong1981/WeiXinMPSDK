@@ -170,6 +170,7 @@
     <Compile Include="Trace\WeixinTrace.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram2.cd" />
     <None Include="ClassDiagrams\MessageHandler.cd" />
   </ItemGroup>
   <ItemGroup />
